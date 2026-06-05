@@ -1,4 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 import {
   Button,
   FormControl,
@@ -94,7 +96,48 @@ export function DriverOfOtherInsuranceHolderForm() {
 
   const handlePrev = () => navigate('/insurance-holder-b');
 
-  let initialState: DriverOfOtherInsuranceHolderFormState = {};
+  const storedValues = useStepInitialValues(
+    'driver-b',
+    {} as DriverOfOtherInsuranceHolderFormState
+  );
+
+  const initialState = useMemo(() => {
+    let state: DriverOfOtherInsuranceHolderFormState = { ...storedValues };
+
+    if (isInsuranceHolder) {
+      const driverHolderString = sessionStorage.getItem('insurance-holder-b');
+      if (driverHolderString) {
+        const driverHolder: OtherInsuranceHolderFormState =
+          JSON.parse(driverHolderString);
+        const {
+          otherInsuranceHolderSurName,
+          otherInsuranceHolderName,
+          otherInsuranceHolderPlace,
+          otherInsuranceHolderPostalCode,
+          otherInsuranceHolderTelephone,
+          otherInsuranceHolderStreet,
+          otherInsuranceHolderStreetNr,
+          otherInsuranceHolderSalutation,
+        } = driverHolder;
+        state = {
+          ...state,
+          otherDriverHolderSurName: otherInsuranceHolderSurName,
+          otherDriverSalutation: otherInsuranceHolderSalutation as
+            | 'Herr'
+            | 'Frau'
+            | '',
+          otherDriverHolderName: otherInsuranceHolderName,
+          otherDriverHolderStreet: otherInsuranceHolderStreet,
+          otherDriverHolderStreetNr: otherInsuranceHolderStreetNr,
+          otherDriverHolderPostalCode: otherInsuranceHolderPostalCode,
+          otherDriverHolderPlace: otherInsuranceHolderPlace,
+          otherDriverHolderTelephone: otherInsuranceHolderTelephone,
+        };
+      }
+    }
+
+    return state;
+  }, [storedValues, isInsuranceHolder]);
 
   const style = React.useMemo(
     () => ({
@@ -105,35 +148,6 @@ export function DriverOfOtherInsuranceHolderForm() {
     }),
     [isFocused, isDragAccept, isDragReject]
   );
-
-  if (isInsuranceHolder) {
-    const driverHolderString = sessionStorage.getItem('insurance-holder-b');
-    if (driverHolderString) {
-      const driverHolder: OtherInsuranceHolderFormState =
-        JSON.parse(driverHolderString);
-      const {
-        otherInsuranceHolderSurName,
-        otherInsuranceHolderName,
-        otherInsuranceHolderPlace,
-        otherInsuranceHolderPostalCode,
-        otherInsuranceHolderTelephone,
-        otherInsuranceHolderStreet,
-        otherInsuranceHolderStreetNr,
-        otherInsuranceHolderSalutation,
-      } = driverHolder;
-      initialState = {
-        ...initialState,
-        otherDriverHolderSurName: otherInsuranceHolderSurName,
-        otherDriverSalutation: otherInsuranceHolderSalutation as any,
-        otherDriverHolderName: otherInsuranceHolderName,
-        otherDriverHolderStreet: otherInsuranceHolderStreet,
-        otherDriverHolderStreetNr: otherInsuranceHolderStreetNr,
-        otherDriverHolderPostalCode: otherInsuranceHolderPostalCode,
-        otherDriverHolderPlace: otherInsuranceHolderPlace,
-        otherDriverHolderTelephone: otherInsuranceHolderTelephone,
-      };
-    }
-  }
 
   return (
     <Formik
@@ -159,7 +173,7 @@ export function DriverOfOtherInsuranceHolderForm() {
         navigate('/witnesses');
       }}
     >
-      {({ values, errors, handleSubmit, handleChange, setFieldValue }) => (
+      {({ values, errors, handleSubmit, handleChange, setFieldValue, setValues }) => (
         <form onSubmit={handleSubmit}>
           <Grid container spacing={1} id="other-driver-of-holder">
             <Typography variant="h6" className="mb-3">
@@ -483,6 +497,11 @@ export function DriverOfOtherInsuranceHolderForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="driver-b"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

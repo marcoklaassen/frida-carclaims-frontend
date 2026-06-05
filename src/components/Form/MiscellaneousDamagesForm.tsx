@@ -13,18 +13,26 @@ import { Field, Formik } from 'formik';
 import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { MiscellaneousDamagesFormState } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+
+const defaultMiscState: MiscellaneousDamagesFormState = {
+  otherDamages: '',
+  damages: '',
+};
 
 export function MiscellaneousDamagesForm() {
   const navigate = useNavigate();
-  const initialValues: MiscellaneousDamagesFormState = {
-    otherDamages: '',
-    damages: '',
-  };
+  const initialValues = useStepInitialValues(
+    'miscellaneousDamages',
+    defaultMiscState
+  );
 
   const handlePrev = () => navigate('/injured');
 
   return (
     <Formik
+      enableReinitialize
       initialValues={initialValues}
       // validateOnChange
       // validate={(values) => {
@@ -52,7 +60,7 @@ export function MiscellaneousDamagesForm() {
         navigate('/insurance-holder-b');
       }}
     >
-      {({ errors, touched, handleChange, handleSubmit, values }) => (
+      {({ errors, touched, handleChange, handleSubmit, values, setValues }) => (
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3} id="other-damages">
             <Grid item xs={12} md={4}>
@@ -113,6 +121,11 @@ export function MiscellaneousDamagesForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="miscellaneousDamages"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

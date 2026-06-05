@@ -18,10 +18,10 @@ import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import dayjs from 'dayjs';
 import { InsuranceHolderFormState } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 
-export function InsuranceHolderForm() {
-  const navigate = useNavigate();
-  const state: InsuranceHolderFormState = {
+const defaultInsuranceHolderState: InsuranceHolderFormState = {
     allRiskInsurance: '',
     carBrand: '',
     carModel: '',
@@ -42,13 +42,21 @@ export function InsuranceHolderForm() {
     licenseNumber: '',
     pretaxes: '',
     validDateGreenCard: dayjs(),
-  };
+};
+
+export function InsuranceHolderForm() {
+  const navigate = useNavigate();
+  const initialValues = useStepInitialValues(
+    'insurance-holder-a',
+    defaultInsuranceHolderState
+  );
 
   const handlePrev = () => navigate('/accident');
 
   return (
     <Formik
-      initialValues={state}
+      enableReinitialize
+      initialValues={initialValues}
       onSubmit={(values) => {
         console.log("InsuranceHolderForm -> values", values)
         const string = JSON.stringify(values);
@@ -307,6 +315,11 @@ export function InsuranceHolderForm() {
               </Grid>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="insurance-holder-a"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

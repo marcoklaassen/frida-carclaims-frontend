@@ -26,21 +26,22 @@ import {
   OtherInsuranceHolderFormState,
   WitnessDetails,
 } from '../types';
-import dayjs from 'dayjs';
+import { toApiDate, toApiTime } from './dateUtils';
 
 function createImageBase64(
-  imgsURL: string[],
-  files: File &
-    {
-      path?: string;
-    }[]
+  imgsURL: string[] | undefined,
+  files: Array<{ path?: string }> | undefined
 ): { file: string; path: string }[] {
+  if (!imgsURL?.length) {
+    return [];
+  }
+
   return imgsURL.map((url: string, index: number) => {
     const base64Data = url.split(',')[1];
 
     return {
       file: base64Data,
-      path: files[index]?.path || 'Hello',
+      path: files?.[index]?.path || 'Hello',
     };
   });
 }
@@ -412,11 +413,7 @@ export function mapDTO(): Claimsdata {
       vin: chassisNr,
       currentMileage: currentKM ? parseInt(currentKM) : undefined,
       greencardNumber: greenCardNr,
-      greencardExpirydate: validDateGreenCard
-        ? dayjs.isDayjs(validDateGreenCard)
-          ? validDateGreenCard.toDate()
-          : undefined
-        : undefined,
+      greencardExpirydate: toApiDate(validDateGreenCard),
       comprehensiveInsurance: (() => {
         if (!allRiskInsurance) {
           return PolicyholderComprehensiveInsuranceEnum.NotSpecified;
@@ -507,11 +504,7 @@ export function mapDTO(): Claimsdata {
       vin: otherChassisNr,
       currentMileage: otherCurrentKM ? parseInt(otherCurrentKM) : undefined,
       greencardNumber: otherGreenCardNr,
-      greencardExpirydate: otherValidDateGreenCard
-        ? dayjs.isDayjs(otherValidDateGreenCard)
-          ? otherValidDateGreenCard.toDate()
-          : undefined
-        : undefined,
+      greencardExpirydate: toApiDate(otherValidDateGreenCard),
       comprehensiveInsurance: (() => {
         if (!otherAllRiskInsurance) {
           return PolicyholderComprehensiveInsuranceEnum.NotSpecified;
@@ -533,9 +526,14 @@ export function mapDTO(): Claimsdata {
   //Witness
   const witnessesString = sessionStorage.getItem('witness');
   if (witnessesString) {
-    const witnesses: WitnessDetails[] = JSON.parse(witnessesString).witnesses;
-    existingWitness = JSON.parse(witnessesString).existingWitness;
-    witnessesCount = JSON.parse(witnessesString).witnessesCount;
+    const witnessData = JSON.parse(witnessesString) as {
+      witnesses?: WitnessDetails[];
+      existingWitness?: string;
+      witnessesCount?: number;
+    };
+    const witnesses = witnessData.witnesses ?? [];
+    existingWitness = witnessData.existingWitness;
+    witnessesCount = witnessData.witnessesCount?.toString();
 
     witness = witnesses.map((witness) => {
       return {
@@ -642,10 +640,8 @@ export function mapDTO(): Claimsdata {
           return ClaimsdataLanguageEnum.De;
       }
     })(),
-    accidentDate: dayjs(accidentDate).toDate(),
-    accidentTime: accidentTime
-      ? dayjs(accidentTime).format('HH:mm:ss')
-      : undefined,
+    accidentDate: toApiDate(accidentDate),
+    accidentTime: toApiTime(accidentTime),
     accidentPostalCode: postalCode,
     accidentCity: place,
     accidentStreetName: street,

@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 import {
   Autocomplete,
   Button,
@@ -39,8 +41,6 @@ import {
 } from '../HDIDropzone';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { on } from 'events';
-
 export function DriverOfInsuranceHolderForm() {
   const navigate = useNavigate();
   const [isInsuranceHolder, setInsuranceHolder] = useState<boolean>(false);
@@ -95,36 +95,48 @@ export function DriverOfInsuranceHolderForm() {
     }
   }, [files]);
 
-  let initialState: DriverOfInsuranceHolderFormState = {};
+  const storedValues = useStepInitialValues(
+    'driver-a',
+    {} as DriverOfInsuranceHolderFormState
+  );
 
-  if (isInsuranceHolder) {
-    const driverHolderString = sessionStorage.getItem('insurance-holder-a');
-    if (driverHolderString) {
-      const driverHolder: InsuranceHolderFormState =
-        JSON.parse(driverHolderString);
-      const {
-        insuranceHolderSurName,
-        insuranceHolderName,
-        insuranceHolderPlace,
-        insuranceHolderPostalCode,
-        insuranceHolderTelephone,
-        insuranceHolderStreet,
-        insuranceHolderStreetNr,
-        insuranceHolderSalutation,
-      } = driverHolder;
-      initialState = {
-        ...initialState,
-        driverHolderSurName: insuranceHolderSurName,
-        driverSalutation: insuranceHolderSalutation as any,
-        driverHolderName: insuranceHolderName,
-        driverHolderStreet: insuranceHolderStreet,
-        driverHolderStreetNr: insuranceHolderStreetNr,
-        driverHolderPostalCode: insuranceHolderPostalCode,
-        driverHolderPlace: insuranceHolderPlace,
-        driverHolderTelephone: insuranceHolderTelephone,
-      };
+  const initialState = useMemo(() => {
+    let state: DriverOfInsuranceHolderFormState = { ...storedValues };
+
+    if (isInsuranceHolder) {
+      const driverHolderString = sessionStorage.getItem('insurance-holder-a');
+      if (driverHolderString) {
+        const driverHolder: InsuranceHolderFormState =
+          JSON.parse(driverHolderString);
+        const {
+          insuranceHolderSurName,
+          insuranceHolderName,
+          insuranceHolderPlace,
+          insuranceHolderPostalCode,
+          insuranceHolderTelephone,
+          insuranceHolderStreet,
+          insuranceHolderStreetNr,
+          insuranceHolderSalutation,
+        } = driverHolder;
+        state = {
+          ...state,
+          driverHolderSurName: insuranceHolderSurName,
+          driverSalutation: insuranceHolderSalutation as
+            | 'Herr'
+            | 'Frau'
+            | '',
+          driverHolderName: insuranceHolderName,
+          driverHolderStreet: insuranceHolderStreet,
+          driverHolderStreetNr: insuranceHolderStreetNr,
+          driverHolderPostalCode: insuranceHolderPostalCode,
+          driverHolderPlace: insuranceHolderPlace,
+          driverHolderTelephone: insuranceHolderTelephone,
+        };
+      }
     }
-  }
+
+    return state;
+  }, [storedValues, isInsuranceHolder]);
 
   const style = useMemo(
     () => ({
@@ -462,6 +474,11 @@ export function DriverOfInsuranceHolderForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="driver-a"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

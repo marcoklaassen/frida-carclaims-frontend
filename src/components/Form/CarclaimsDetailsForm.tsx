@@ -18,13 +18,14 @@ import {
 } from '@mui/x-date-pickers';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Field, Formik } from 'formik';
+import { Field, Formik, FormikProps } from 'formik';
 import { Languages } from '../../config';
 import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { CarclaimsDetailsState } from '../../types';
 import dayjs from 'dayjs';
-import { useGetAddress } from '../../hooks';
+import { useGetAddress, useStepInitialValues } from '../../hooks';
 import { useNavigate } from 'react-router-dom';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 // import * as Yup from 'yup';
 
 // const carclaimsDatailsValidator = Yup.object().shape({
@@ -45,51 +46,48 @@ import { useNavigate } from 'react-router-dom';
 //   processNr: Yup.string(),
 // });
 
-export function CarclaimsDetailsForm() {
-  const [values, setInitialState] = React.useState<CarclaimsDetailsState>({
-    accidentDate: dayjs(),
-    accidentTime: dayjs(),
-    language: 'DE',
-    street: '',
-    houseNr: '',
-    place: '',
-    postalCode: '',
-  });
-  const { loading, address, handleClicked } = useGetAddress();
+const defaultCarclaimsDetails: CarclaimsDetailsState = {
+  accidentDate: dayjs(),
+  accidentTime: dayjs(),
+  language: 'DE',
+  street: '',
+  houseNr: '',
+  place: '',
+  postalCode: '',
+};
 
-  const navigate = useNavigate();
+type CarclaimsDetailsFormContentProps = {
+  formik: FormikProps<CarclaimsDetailsState>;
+  loading: boolean;
+  address: ReturnType<typeof useGetAddress>['address'];
+  onGeolocation: () => void;
+  onBack: () => void;
+};
 
-  const handleGeolocation = () => {
-    handleClicked();
-  };
+function CarclaimsDetailsFormContent({
+  formik,
+  loading,
+  address,
+  onGeolocation,
+  onBack,
+}: CarclaimsDetailsFormContentProps) {
+  const { handleChange, handleSubmit, errors, touched, setValues, values } =
+    formik;
 
   React.useEffect(() => {
     if (address) {
-      console.log(address);
-      setInitialState((old) => ({
-        ...old,
+      setValues({
+        ...values,
         street: address.address.road,
         houseNr: address.address.house_number,
         place: address.address.city,
         postalCode: address.address.postcode,
-      }));
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   return (
-    <Formik
-      enableReinitialize
-      initialValues={values}
-      onSubmit={(values) => {
-        console.log(values);
-        const string = JSON.stringify(values);
-        sessionStorage.setItem('carclaimsDetails', string);
-        window.scrollTo(0, 0);
-        navigate('/insurance-holder-a');
-      }}
-      // validationSchema={carclaimsDatailsValidator}
-    >
-      {({ handleChange, handleSubmit, errors, touched }) => (
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3} id="kfz-details" className="mb-3">
             <Grid item xs={12}>
@@ -149,7 +147,7 @@ export function CarclaimsDetailsForm() {
                     label="* Datum des Unfalls"
                     value={values.accidentDate}
                     onChange={(newValue) =>
-                      setInitialState({
+                      setValues({
                         ...values,
                         accidentDate: newValue,
                       })
@@ -169,7 +167,7 @@ export function CarclaimsDetailsForm() {
                     label="* Uhrzeit des Unfalls"
                     value={values.accidentTime}
                     onChange={(newValue) =>
-                      setInitialState({
+                      setValues({
                         ...values,
                         accidentTime: newValue,
                       })
@@ -226,7 +224,7 @@ export function CarclaimsDetailsForm() {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleGeolocation}
+                    onClick={onGeolocation}
                     disabled={loading}
                   >
                     <LocationOnIcon />
@@ -286,7 +284,7 @@ export function CarclaimsDetailsForm() {
                 <Button
                   variant="contained"
                   color="error"
-                  onClick={() => navigate('/')}
+                  onClick={onBack}
                 >
                   Zurück
                 </Button>
@@ -296,7 +294,44 @@ export function CarclaimsDetailsForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="carclaimsDetails"
+            language={values.language}
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
+  );
+}
+
+export function CarclaimsDetailsForm() {
+  const initialValues = useStepInitialValues(
+    'carclaimsDetails',
+    defaultCarclaimsDetails
+  );
+  const { loading, address, handleClicked } = useGetAddress();
+  const navigate = useNavigate();
+
+  return (
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      onSubmit={(values) => {
+        console.log(values);
+        const string = JSON.stringify(values);
+        sessionStorage.setItem('carclaimsDetails', string);
+        window.scrollTo(0, 0);
+        navigate('/insurance-holder-a');
+      }}
+    >
+      {(formik) => (
+        <CarclaimsDetailsFormContent
+          formik={formik}
+          loading={loading}
+          address={address}
+          onGeolocation={handleClicked}
+          onBack={() => navigate('/')}
+        />
       )}
     </Formik>
   );

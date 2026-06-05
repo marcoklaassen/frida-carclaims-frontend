@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Button,
   FormControl,
@@ -15,15 +15,20 @@ import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { InjuredPeopleFormState } from '../../types';
 import { ButtonGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+
+const defaultInjuredState: InjuredPeopleFormState = {};
 
 export function InjuredPeopleForm() {
   const navigate = useNavigate();
-  const [state] = useState<InjuredPeopleFormState>({});
+  const initialValues = useStepInitialValues('injuredDetails', defaultInjuredState);
 
   const handleBack = () => navigate('/driver-of-insurance-holder-a');
   return (
     <Formik
-      initialValues={state}
+      enableReinitialize
+      initialValues={initialValues}
       onSubmit={(values) => {
         console.log(values);
         const string = JSON.stringify(values);
@@ -42,7 +47,7 @@ export function InjuredPeopleForm() {
       //   }
       // }}
     >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, setValues }) => (
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2} id="injured-container">
             <Grid item xs={12}>
@@ -104,6 +109,11 @@ export function InjuredPeopleForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="injuredDetails"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

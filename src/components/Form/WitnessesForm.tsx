@@ -13,6 +13,8 @@ import { Field, FieldArray, Formik, FormikErrors } from 'formik';
 import { stackDirection, stackSpacing } from '../../config';
 import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { WitnessesFormState } from '../../types';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 import * as Yup from 'yup';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { useNavigate } from 'react-router';
@@ -65,12 +67,14 @@ export async function sendClaimsdataRequest() {
   return api.createClaimByPID(postRequest);
 }
 
+const defaultWitnessState: WitnessesFormState = {
+  existingWitness: '',
+  witnesses: [],
+};
+
 export function WitnessesForm() {
   const navigate = useNavigate();
-  const initialValues: WitnessesFormState = {
-    existingWitness: '',
-    witnesses: [],
-  };
+  const initialValues = useStepInitialValues('witness', defaultWitnessState);
 
   async function sendClaimsdata() {
     sendClaimsdataRequest()
@@ -89,6 +93,7 @@ export function WitnessesForm() {
   const handleForward = () => navigate('/results');
   return (
     <Formik
+      enableReinitialize
       initialValues={initialValues}
       onSubmit={(values) => {
         const string = JSON.stringify(values);
@@ -107,7 +112,7 @@ export function WitnessesForm() {
       }}
       // validationSchema={witnessesFormValidator}
     >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, setValues }) => (
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3} id="witness-container" className="mb-3">
             <Grid item xs={12} md={4}>
@@ -323,6 +328,11 @@ export function WitnessesForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="witness"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>

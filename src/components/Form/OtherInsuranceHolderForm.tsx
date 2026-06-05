@@ -18,17 +18,25 @@ import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { OtherInsuranceHolderFormState } from '../../types';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+import { useStepInitialValues } from '../../hooks';
+import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+
+const defaultOtherInsuranceHolderState: OtherInsuranceHolderFormState = {
+  otherValidDateGreenCard: dayjs(),
+};
 
 export function OtherInsuranceHolderForm() {
   const navigate = useNavigate();
+  const initialValues = useStepInitialValues(
+    'insurance-holder-b',
+    defaultOtherInsuranceHolderState
+  );
 
-  const handlePrev = () => navigate('/insurance-holder-b');
+  const handlePrev = () => navigate('/miscellaneous-damage');
 
-  const initialValues: OtherInsuranceHolderFormState = {
-    otherValidDateGreenCard: dayjs(),
-  };
   return (
     <Formik
+      enableReinitialize
       initialValues={initialValues}
       onSubmit={(values) => {
         console.log("OtherInsuranceHolderForm -> values", values)
@@ -283,6 +291,11 @@ export function OtherInsuranceHolderForm() {
               </ButtonGroup>
             </Grid>
           </Grid>
+          <VoiceInputButton
+            stepKey="insurance-holder-b"
+            currentState={values}
+            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+          />
         </form>
       )}
     </Formik>
