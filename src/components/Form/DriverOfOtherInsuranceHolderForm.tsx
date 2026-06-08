@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+import { hasFieldValue } from '../../utils/formFieldUtils';
 import {
   Button,
   FormControl,
@@ -218,14 +220,14 @@ export function DriverOfOtherInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} md={8} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderName"
                       value={values.otherDriverHolderName}
                       label="* Name"
                       onChange={handleChange}
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderSurName"
                       value={values.otherDriverHolderSurName}
                       label="* Vorname"
@@ -236,14 +238,14 @@ export function DriverOfOtherInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} md={8} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderDriverLicense"
                       value={values.otherDriverHolderDriverLicense}
                       label="* Führerschein-Nr.:"
                       onChange={handleChange}
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderIssuer"
                       value={values.otherDriverHolderIssuer}
                       label="* Ausgestellt durch:"
@@ -255,14 +257,14 @@ export function DriverOfOtherInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} md={8} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderStreet"
                       value={values.otherDriverHolderStreet}
                       onChange={handleChange}
                       label="* Straße"
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderStreetNr"
                       value={values.otherDriverHolderStreetNr}
                       onChange={handleChange}
@@ -272,13 +274,13 @@ export function DriverOfOtherInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} md={8} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderPostalCode"
                       value={values.otherDriverHolderPostalCode}
                       label="* Postleitzahl"
                       onChange={handleChange}
                     />
-                    <TextField
+                    <FormTextField
                       name="otherDriverHolderPlace"
                       value={values.otherDriverHolderPlace}
                       label="* Ort"
@@ -289,7 +291,7 @@ export function DriverOfOtherInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} md={8} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       type="tel"
                       name="otherDriverHolderTelephone"
                       value={values.otherDriverHolderTelephone}
@@ -344,16 +346,21 @@ export function DriverOfOtherInsuranceHolderForm() {
                     multiple
                     id=""
                     options={DamagedPlace.map((option) => option.label)}
+                    value={values.otherDriverHolderDamagePlace ?? []}
                     onChange={(event, value) =>
                       setFieldValue('otherDriverHolderDamagePlace', value)
                     }
                     renderInput={(params) => (
-                      <TextField
+                      <FormTextField
                         {...params}
                         inputProps={{ ...params.inputProps, readOnly: true }}
                         variant="outlined"
                         label="Markieren Sie die Unfallstellen"
-                        placeholder="Unfallstellen"
+                        placeholder={
+                          hasFieldValue(values.otherDriverHolderDamagePlace)
+                            ? undefined
+                            : 'Unfallstellen'
+                        }
                       />
                     )}
                   />
@@ -361,23 +368,23 @@ export function DriverOfOtherInsuranceHolderForm() {
               </Stack>
             </Grid>
             <Grid item xs={12} md={8} className="mb-3">
-              <TextField
+              <FormTextField
                 multiline
                 fullWidth
                 minRows={4}
                 variant="outlined"
-                placeholder="Sichtbare Schäden"
+                label="Sichtbare Schäden"
                 value={values.otherDriverHolderVisibleDamage}
                 name="otherDriverHolderVisibleDamage"
                 onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} md={8} className="mb-3">
-              <TextField
+              <FormTextField
                 minRows={4}
                 variant="outlined"
                 multiline
-                placeholder="Bemerkungen"
+                label="Bemerkungen"
                 value={values.otherDriverHolderNotes}
                 name="otherDriverHolderNotes"
                 onChange={handleChange}
@@ -499,8 +506,8 @@ export function DriverOfOtherInsuranceHolderForm() {
           </Grid>
           <VoiceInputButton
             stepKey="driver-b"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}

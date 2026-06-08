@@ -6,10 +6,10 @@ import {
   InputLabel,
   MenuItem,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material';
-import { Field, FieldArray, Formik, FormikErrors } from 'formik';
+import { Field, FieldArray, Formik, FormikErrors, getIn } from 'formik';
+import { FormTextField } from '../FormTextField';
 import { stackDirection, stackSpacing } from '../../config';
 import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { WitnessesFormState } from '../../types';
@@ -142,9 +142,10 @@ export function WitnessesForm() {
               <>
                 <Grid item xs={12} md={12}>
                   <Grid item xs={12} md={4}>
-                    <TextField
+                    <FormTextField
                       name="witnessesCount"
                       type="number"
+                      value={values.witnessesCount}
                       onChange={handleChange}
                       label="Anzahl der Zeugen"
                       fullWidth
@@ -223,17 +224,17 @@ export function WitnessesForm() {
                                     direction={stackDirection}
                                     spacing={stackSpacing}
                                   >
-                                    <TextField
+                                    <FormTextField
                                       label="* Name"
                                       name={`witnesses[${i}].lastName`}
-                                      // value={`witnesses[${i}].lastName`}
+                                      value={getIn(values, `witnesses[${i}].lastName`)}
                                       onChange={handleChange}
                                       fullWidth
                                     />
-                                    <TextField
+                                    <FormTextField
                                       label="* Vorname"
                                       name={`witnesses[${i}].surName`}
-                                      // value={`witnesses[${i}].surname`}
+                                      value={getIn(values, `witnesses[${i}].surName`)}
                                       onChange={handleChange}
                                       fullWidth
                                     />
@@ -244,18 +245,18 @@ export function WitnessesForm() {
                                     direction={stackDirection}
                                     spacing={stackSpacing}
                                   >
-                                    <TextField
+                                    <FormTextField
                                       label="* Straße"
                                       name={`witnesses[${i}].street`}
+                                      value={getIn(values, `witnesses[${i}].street`)}
                                       onChange={handleChange}
-                                      // value={`witnesses[${i}].street`}
                                       fullWidth
                                     />
-                                    <TextField
+                                    <FormTextField
                                       label="* Hausnummer"
                                       name={`witnesses[${i}].houseNr`}
+                                      value={getIn(values, `witnesses[${i}].houseNr`)}
                                       onChange={handleChange}
-                                      // value={`witnesses[${i}].houseNr`}
                                     />
                                   </Stack>
                                 </Grid>
@@ -264,17 +265,17 @@ export function WitnessesForm() {
                                     direction={stackDirection}
                                     spacing={stackSpacing}
                                   >
-                                    <TextField
+                                    <FormTextField
                                       label="* Postleitzahl"
                                       name={`witnesses[${i}].postalCode`}
+                                      value={getIn(values, `witnesses[${i}].postalCode`)}
                                       onChange={handleChange}
-                                      // value={`witnesses[${i}].postalCode`}
                                     />
-                                    <TextField
+                                    <FormTextField
                                       label="* Ort"
                                       name={`witnesses[${i}].place`}
+                                      value={getIn(values, `witnesses[${i}].place`)}
                                       onChange={handleChange}
-                                      // value={`witnesses[${i}].place`}
                                       fullWidth
                                     />
                                   </Stack>
@@ -284,19 +285,19 @@ export function WitnessesForm() {
                                     direction={stackDirection}
                                     spacing={stackSpacing}
                                   >
-                                    <TextField
+                                    <FormTextField
                                       label="* Email"
                                       type="email"
-                                      // value={`witnesses[${i}].email`}
                                       name={`witnesses[${i}].email`}
+                                      value={getIn(values, `witnesses[${i}].email`)}
                                       onChange={handleChange}
                                       fullWidth
                                     />
-                                    <TextField
+                                    <FormTextField
                                       label="* Telefonnummer"
                                       type="tel"
                                       name={`witnesses[${i}].telephone`}
-                                      // value={`witnesses[${i}].telephone`}
+                                      value={getIn(values, `witnesses[${i}].telephone`)}
                                       onChange={handleChange}
                                       fullWidth
                                     />
@@ -330,8 +331,8 @@ export function WitnessesForm() {
           </Grid>
           <VoiceInputButton
             stepKey="witness"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}

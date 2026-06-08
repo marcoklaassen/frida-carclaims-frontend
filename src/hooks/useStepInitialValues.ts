@@ -1,29 +1,7 @@
 import { useMemo } from 'react';
 import { mergeDefined } from '../utils/mergeDefined';
-import { parseToDayjs } from '../mapping/dateUtils';
+import { normalizeStepValuesForForm } from '../mapping/normalizeStepValuesForForm';
 import { StepStorageKey } from '../mapping/stepStorageKeys';
-
-const DATE_FIELDS = [
-  'accidentDate',
-  'accidentTime',
-  'validDateGreenCard',
-  'otherValidDateGreenCard',
-] as const;
-
-function parseStoredDates(values: Record<string, unknown>): Record<string, unknown> {
-  const result = { ...values };
-
-  for (const field of DATE_FIELDS) {
-    const parsed = parseToDayjs(result[field]);
-    if (parsed) {
-      result[field] = parsed;
-    } else {
-      delete result[field];
-    }
-  }
-
-  return result;
-}
 
 export function useStepInitialValues<T extends object>(
   storageKey: StepStorageKey,
@@ -35,7 +13,7 @@ export function useStepInitialValues<T extends object>(
 
     try {
       const stored = JSON.parse(raw) as Record<string, unknown>;
-      const withDates = parseStoredDates(stored);
+      const withDates = normalizeStepValuesForForm(storageKey, stored);
       return mergeDefined(
         { ...defaults } as Record<string, unknown>,
         withDates

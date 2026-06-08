@@ -1,5 +1,6 @@
 import { Claimsdata } from '../api';
 import { mergeDefined } from '../utils/mergeDefined';
+import { normalizeStepValuesForForm } from './normalizeStepValuesForForm';
 import { mapClaimsdataToStepStates } from './reverseDtoMapper';
 import { StepStorageKey } from './stepStorageKeys';
 
@@ -32,5 +33,5 @@ export function applyVoiceExtraction(
     }
   }
 
-  return currentStepMerged;
+  return normalizeStepValuesForForm(currentStepKey, currentStepMerged);
 }

@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+import { hasFieldValue } from '../../utils/formFieldUtils';
 import {
   Autocomplete,
   Button,
@@ -213,14 +215,14 @@ export function DriverOfInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="driverHolderName"
                       value={values.driverHolderName}
                       label="* Name"
                       onChange={handleChange}
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="driverHolderSurName"
                       value={values.driverHolderSurName}
                       label="* Vorname"
@@ -231,14 +233,14 @@ export function DriverOfInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="driverHolderDriverLicense"
                       value={values.driverHolderDriverLicense}
                       label="Führerschein-Nr.:"
                       onChange={handleChange}
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="driverHolderIssuer"
                       value={values.driverHolderIssuer}
                       label="Ausgestellt durch:"
@@ -250,14 +252,14 @@ export function DriverOfInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="driverHolderStreet"
                       value={values.driverHolderStreet}
                       onChange={handleChange}
                       label="* Straße"
                       fullWidth
                     />
-                    <TextField
+                    <FormTextField
                       name="driverHolderStreetNr"
                       value={values.driverHolderStreetNr}
                       onChange={handleChange}
@@ -267,13 +269,13 @@ export function DriverOfInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       name="driverHolderPostalCode"
                       value={values.driverHolderPostalCode}
                       label="* Postleitzahl"
                       onChange={handleChange}
                     />
-                    <TextField
+                    <FormTextField
                       name="driverHolderPlace"
                       value={values.driverHolderPlace}
                       label="* Ort"
@@ -284,7 +286,7 @@ export function DriverOfInsuranceHolderForm() {
                 </Grid>
                 <Grid item xs={12} className="mb-3">
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       type="tel"
                       name="driverHolderTelephone"
                       value={values.driverHolderTelephone}
@@ -334,16 +336,21 @@ export function DriverOfInsuranceHolderForm() {
                     multiple
                     id=""
                     options={DamagedPlace.map((option) => option.label)}
+                    value={values.driverHolderDamagePlace ?? []}
                     onChange={(event, value) =>
                       setFieldValue('driverHolderDamagePlace', value)
                     }
                     renderInput={(params) => (
-                      <TextField
+                      <FormTextField
                         {...params}
                         inputProps={{ ...params.inputProps, readOnly: true }}
                         variant="outlined"
                         label="Markieren Sie die Unfallstellen"
-                        placeholder="Unfallstellen"
+                        placeholder={
+                          hasFieldValue(values.driverHolderDamagePlace)
+                            ? undefined
+                            : 'Unfallstellen'
+                        }
                       />
                     )}
                   />
@@ -352,23 +359,23 @@ export function DriverOfInsuranceHolderForm() {
             </Grid>
 
             <Grid item xs={12} className="mb-3">
-              <TextField
+              <FormTextField
                 multiline
                 fullWidth
                 minRows={4}
                 variant="outlined"
-                placeholder="Sichtbare Schäden"
+                label="Sichtbare Schäden"
                 value={values.driverHolderVisibleDamage}
                 name="driverHolderVisibleDamage"
                 onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} className="mb-3">
-              <TextField
+              <FormTextField
                 minRows={4}
                 variant="outlined"
                 multiline
-                placeholder="Bemerkungen"
+                label="Bemerkungen"
                 value={values.driverHolderNotes}
                 name="driverHolderNotes"
                 onChange={handleChange}
@@ -476,8 +483,8 @@ export function DriverOfInsuranceHolderForm() {
           </Grid>
           <VoiceInputButton
             stepKey="driver-a"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}

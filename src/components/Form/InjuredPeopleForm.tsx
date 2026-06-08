@@ -16,6 +16,7 @@ import { InjuredPeopleFormState } from '../../types';
 import { ButtonGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 
 const defaultInjuredState: InjuredPeopleFormState = {};
@@ -78,7 +79,7 @@ export function InjuredPeopleForm() {
               <>
                 <Grid item xs={12} md={8}>
                   <Stack direction={stackDirection} spacing={stackSpacing}>
-                    <TextField
+                    <FormTextField
                       label="* Anzahl der Verletzte"
                       value={values.injuredCount}
                       onChange={handleChange}
@@ -111,8 +112,8 @@ export function InjuredPeopleForm() {
           </Grid>
           <VoiceInputButton
             stepKey="injuredDetails"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}

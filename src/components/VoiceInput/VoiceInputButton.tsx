@@ -37,17 +37,22 @@ const pulse = keyframes`
 
 export type VoiceInputButtonProps = {
   stepKey: StepStorageKey;
-  onValuesMerged: (mergedStepValues: Record<string, unknown>) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setFormValues: (values: any) => void;
+  formValues: object;
   language?: string;
-  currentState?: object;
 };
 
 export function VoiceInputButton({
   stepKey,
-  onValuesMerged,
+  setFormValues,
+  formValues,
   language,
-  currentState = {},
 }: VoiceInputButtonProps) {
+  const formValuesRef = React.useRef<Record<string, unknown>>(
+    formValues as Record<string, unknown>
+  );
+  formValuesRef.current = formValues as Record<string, unknown>;
   const {
     isRecording,
     audioBlob,
@@ -79,13 +84,10 @@ export function VoiceInputButton({
         const response = await submitVoiceAudio(blob, {
           language: language ?? getLanguageFromSession(),
           stepKey,
-          currentState: buildVoiceCurrentState(
-            stepKey,
-            currentState as Record<string, unknown>
-          ),
+          currentState: buildVoiceCurrentState(stepKey, formValuesRef.current),
         });
         const merged = applyVoiceExtraction(response, stepKey);
-        onValuesMerged(merged);
+        setFormValues({ ...formValuesRef.current, ...merged });
         showMessage('Angaben übernommen', 'success');
         reset();
       } catch (err) {
@@ -97,7 +99,7 @@ export function VoiceInputButton({
         setPendingSubmit(false);
       }
     },
-    [language, currentState, stepKey, onValuesMerged, showMessage, reset]
+    [language, stepKey, setFormValues, showMessage, reset]
   );
 
   const handleMicClick = useCallback(

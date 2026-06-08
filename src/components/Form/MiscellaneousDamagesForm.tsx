@@ -14,6 +14,7 @@ import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { MiscellaneousDamagesFormState } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 
 const defaultMiscState: MiscellaneousDamagesFormState = {
@@ -91,7 +92,7 @@ export function MiscellaneousDamagesForm() {
                   <Typography variant="caption">
                     Zum Beispiel: Straßenlampe gestoßen, Bauwerk beschädigt usw.
                   </Typography>
-                  <TextField
+                  <FormTextField
                     className="mt-2"
                     multiline
                     rows={10}
@@ -123,8 +124,8 @@ export function MiscellaneousDamagesForm() {
           </Grid>
           <VoiceInputButton
             stepKey="miscellaneousDamages"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}

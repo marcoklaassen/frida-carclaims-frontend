@@ -24,6 +24,8 @@ import { CustomizedSelectForFormik } from '../CustomizedSelectForFormik';
 import { CarclaimsDetailsState } from '../../types';
 import dayjs from 'dayjs';
 import { useGetAddress, useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
+import { withDatePickerInputProps } from '../../utils/formFieldUtils';
 import { useNavigate } from 'react-router-dom';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
 // import * as Yup from 'yup';
@@ -73,7 +75,6 @@ function CarclaimsDetailsFormContent({
 }: CarclaimsDetailsFormContentProps) {
   const { handleChange, handleSubmit, errors, touched, setValues, values } =
     formik;
-
   React.useEffect(() => {
     if (address) {
       setValues({
@@ -115,7 +116,7 @@ function CarclaimsDetailsFormContent({
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={4}>
-                <TextField
+                <FormTextField
                   className="mt-4 mb-2"
                   name="processingNr"
                   value={values.processingNr}
@@ -152,7 +153,11 @@ function CarclaimsDetailsFormContent({
                         accidentDate: newValue,
                       })
                     }
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...withDatePickerInputProps(params, values.accidentDate)}
+                      />
+                    )}
                   />
                   {errors.accidentDate && touched.accidentDate && (
                     <span>{errors.accidentDate}</span>
@@ -172,7 +177,11 @@ function CarclaimsDetailsFormContent({
                         accidentTime: newValue,
                       })
                     }
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...withDatePickerInputProps(params, values.accidentTime)}
+                      />
+                    )}
                   />
                   {errors.accidentTime && touched.accidentTime && (
                     <span>{errors.accidentTime}</span>
@@ -192,7 +201,7 @@ function CarclaimsDetailsFormContent({
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={{ xs: 1, md: 2 }}
               >
-                <TextField
+                <FormTextField
                   name="street"
                   id="street"
                   label="* Straße"
@@ -206,7 +215,7 @@ function CarclaimsDetailsFormContent({
                     )
                   }
                 />
-                <TextField
+                <FormTextField
                   name="houseNr"
                   id="houseNr"
                   label="* Hausnummer"
@@ -237,7 +246,7 @@ function CarclaimsDetailsFormContent({
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={{ xs: 1, md: 2 }}
               >
-                <TextField
+                <FormTextField
                   name="postalCode"
                   id="postalCode"
                   label="* Postleitzahl"
@@ -250,7 +259,7 @@ function CarclaimsDetailsFormContent({
                     )
                   }
                 />
-                <TextField
+                <FormTextField
                   name="place"
                   id="place"
                   label="* Ort"
@@ -267,12 +276,11 @@ function CarclaimsDetailsFormContent({
               </Stack>
             </Grid>
             <Grid item xs={12} md={8}>
-              <TextField
-                // color="neutral"
+              <FormTextField
                 multiline
                 minRows={4}
                 variant="outlined"
-                placeholder="Beschreibung"
+                label="Beschreibung"
                 fullWidth
                 value={values.accidentDetails}
                 name="accidentDetails"
@@ -297,8 +305,8 @@ function CarclaimsDetailsFormContent({
           <VoiceInputButton
             stepKey="carclaimsDetails"
             language={values.language}
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
   );

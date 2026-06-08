@@ -19,7 +19,9 @@ import dayjs from 'dayjs';
 import { InsuranceHolderFormState } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { useStepInitialValues } from '../../hooks';
+import { FormTextField } from '../FormTextField';
 import { VoiceInputButton } from '../VoiceInput/VoiceInputButton';
+import { withDatePickerInputProps } from '../../utils/formFieldUtils';
 
 const defaultInsuranceHolderState: InsuranceHolderFormState = {
     allRiskInsurance: '',
@@ -93,14 +95,14 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderName"
                     value={values.insuranceHolderName}
                     onChange={handleChange}
                     label="* Name"
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderSurName"
                     value={values.insuranceHolderSurName}
                     onChange={handleChange}
@@ -111,14 +113,14 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderStreet"
                     value={values.insuranceHolderStreet}
                     onChange={handleChange}
                     label="* Straße"
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderStreetNr"
                     value={values.insuranceHolderStreetNr}
                     onChange={handleChange}
@@ -128,13 +130,13 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderPostalCode"
                     value={values.insuranceHolderPostalCode}
                     onChange={handleChange}
                     label="* Postleitzahl"
                   />
-                  <TextField
+                  <FormTextField
                     name="insuranceHolderPlace"
                     value={values.insuranceHolderPlace}
                     onChange={handleChange}
@@ -145,7 +147,7 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     type="tel"
                     name="insuranceHolderTelephone"
                     value={values.insuranceHolderTelephone}
@@ -153,7 +155,7 @@ export function InsuranceHolderForm() {
                     label="Telefonnummer"
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     type="email"
                     name="insuranceHolderEmail"
                     value={values.insuranceHolderEmail}
@@ -186,7 +188,7 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     helperText="z.B.: Mercedes Benz, Audi etc."
                     label="* Automarke"
                     name="carBrand"
@@ -194,7 +196,7 @@ export function InsuranceHolderForm() {
                     onChange={handleChange}
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     helperText="z.B.: CLA, A4 etc."
                     label="* Automodell"
                     name="carModel"
@@ -202,7 +204,7 @@ export function InsuranceHolderForm() {
                     onChange={handleChange}
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     helperText="z.B.: BGJ9854."
                     label="* Amtliches Kennzeichen"
                     name="licenseNumber"
@@ -214,7 +216,7 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="insuranceCompany"
                     value={values.insuranceCompany}
                     label="* Gesellschaft"
@@ -222,7 +224,7 @@ export function InsuranceHolderForm() {
                     onChange={handleChange}
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     name="insuranceID"
                     value={values.insuranceID}
                     label="* Versicherungsscheinnummer"
@@ -234,7 +236,7 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="chassisNr"
                     value={values.chassisNr}
                     label="* Fahrgestellnummer"
@@ -242,7 +244,7 @@ export function InsuranceHolderForm() {
                     onChange={handleChange}
                     fullWidth
                   />
-                  <TextField
+                  <FormTextField
                     name="currentKM"
                     value={values.currentKM}
                     label="* Aktueller KM-Stand"
@@ -254,7 +256,7 @@ export function InsuranceHolderForm() {
               </Grid>
               <Grid item xs={12} md={8} className="mb-3">
                 <Stack direction={stackDirection} spacing={stackSpacing}>
-                  <TextField
+                  <FormTextField
                     name="greenCardNr"
                     value={values.greenCardNr}
                     label="Nummer der Grünen Karte des Versicherers"
@@ -275,7 +277,14 @@ export function InsuranceHolderForm() {
                           validDateGreenCard: newValue,
                         })
                       }
-                      renderInput={(params) => <TextField {...params} />}
+                      renderInput={(params) => (
+                        <TextField
+                          {...withDatePickerInputProps(
+                            params,
+                            values.validDateGreenCard
+                          )}
+                        />
+                      )}
                     />
                   </LocalizationProvider>
                 </Stack>
@@ -317,8 +326,8 @@ export function InsuranceHolderForm() {
           </Grid>
           <VoiceInputButton
             stepKey="insurance-holder-a"
-            currentState={values}
-            onValuesMerged={(merged) => setValues({ ...values, ...merged })}
+            formValues={values}
+            setFormValues={setValues}
           />
         </form>
       )}
