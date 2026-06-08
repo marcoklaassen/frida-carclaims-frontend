@@ -2,13 +2,29 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 type RecorderStatus = 'idle' | 'recording' | 'stopped' | 'error';
 
-const MIME_TYPES = ['audio/webm', 'audio/webm;codecs=opus', 'audio/mp4', ''];
+// Prefer opus-in-webm; plain audio/webm is last because some browsers produce bad containers.
+const MIME_TYPES = [
+  'audio/webm;codecs=opus',
+  'audio/webm',
+  'audio/mp4',
+  'audio/ogg;codecs=opus',
+] as const;
 
-function getSupportedMimeType(): string {
+const RECORDING_TIMESLICE_MS = 250;
+const MIN_RECORDING_MS = 500;
+
+export function getSupportedMimeType(): string {
   if (typeof MediaRecorder === 'undefined') {
     return '';
   }
-  return MIME_TYPES.find((type) => !type || MediaRecorder.isTypeSupported(type)) ?? '';
+
+  for (const type of MIME_TYPES) {
+    if (MediaRecorder.isTypeSupported(type)) {
+      return type;
+    }
+  }
+
+  return '';
 }
 
 export function useAudioRecorder() {
@@ -20,12 +36,14 @@ export function useAudioRecorder() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef<string>('');
+  const startedAtRef = useRef<number>(0);
 
   const cleanupStream = useCallback(() => {
     mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
     mediaStreamRef.current = null;
     mediaRecorderRef.current = null;
     chunksRef.current = [];
+    startedAtRef.current = 0;
   }, []);
 
   useEffect(() => {
@@ -48,7 +66,13 @@ export function useAudioRecorder() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
       mediaStreamRef.current = stream;
 
       const mimeType = getSupportedMimeType();
@@ -66,15 +90,31 @@ export function useAudioRecorder() {
       };
 
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, {
-          type: mimeTypeRef.current || 'audio/webm',
-        });
-        setAudioBlob(blob);
-        setStatus('stopped');
+        const durationMs = Date.now() - startedAtRef.current;
+        const blobType = mimeTypeRef.current || chunksRef.current[0]?.type || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: blobType });
+
+        if (durationMs < MIN_RECORDING_MS || blob.size < 1024) {
+          setError(
+            'Aufnahme zu kurz oder ohne Audiodaten. Bitte länger sprechen und erneut versuchen.'
+          );
+          setStatus('error');
+        } else {
+          setAudioBlob(blob);
+          setStatus('stopped');
+        }
+
         cleanupStream();
       };
 
-      recorder.start();
+      recorder.onerror = () => {
+        cleanupStream();
+        setStatus('error');
+        setError('Aufnahme fehlgeschlagen. Bitte erneut versuchen.');
+      };
+
+      startedAtRef.current = Date.now();
+      recorder.start(RECORDING_TIMESLICE_MS);
       setStatus('recording');
     } catch {
       cleanupStream();
@@ -87,9 +127,15 @@ export function useAudioRecorder() {
 
   const stopRecording = useCallback(() => {
     const recorder = mediaRecorderRef.current;
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.stop();
+    if (!recorder || recorder.state === 'inactive') {
+      return;
     }
+
+    // Flush any buffered audio before finalizing the container.
+    if (typeof recorder.requestData === 'function') {
+      recorder.requestData();
+    }
+    recorder.stop();
   }, []);
 
   const reset = useCallback(() => {

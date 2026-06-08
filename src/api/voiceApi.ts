@@ -1,4 +1,5 @@
 import { Claimsdata } from './models/Claimsdata';
+import { getAudioFilename, validateAudioBlob } from '../utils/audioUpload';
 
 // Relative path: nginx (container) or CRA dev proxy forwards /api/ to the backend.
 // Override with REACT_APP_VOICE_API_URL only when not using a reverse proxy.
@@ -26,8 +27,13 @@ export async function submitVoiceAudio(
   audio: Blob,
   options: VoiceExtractRequest = {}
 ): Promise<Partial<Claimsdata>> {
+  const validationError = validateAudioBlob(audio);
+  if (validationError) {
+    throw new VoiceApiError(validationError);
+  }
+
   const formData = new FormData();
-  formData.append('audio', audio, 'recording.webm');
+  formData.append('audio', audio, getAudioFilename(audio));
 
   if (options.currentState && Object.keys(options.currentState).length > 0) {
     formData.append('currentState', JSON.stringify(options.currentState));
