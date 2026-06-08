@@ -18,7 +18,8 @@ import WitnessesPage from './routes/witnesses';
 import DisclaimerPage from './routes/disclaimer';
 import ResultPage from './routes/request-result';
 
-const basename = '/frida-carclaims-frontend';
+const basename =
+  process.env.REACT_APP_BASENAME || '/frida-carclaims-frontend';
 
 const router = createBrowserRouter([
   {

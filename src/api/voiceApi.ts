@@ -1,8 +1,9 @@
 import { Claimsdata } from './models/Claimsdata';
 
-const DEFAULT_VOICE_API_URL = 'http://localhost:8080/api/voice/extract';
+// Relative path: nginx (container) or CRA dev proxy forwards /api/ to the backend.
+// Override with REACT_APP_VOICE_API_URL only when not using a reverse proxy.
 const VOICE_API_URL =
-  process.env.REACT_APP_VOICE_API_URL || DEFAULT_VOICE_API_URL;
+  process.env.REACT_APP_VOICE_API_URL || '/api/voice/extract';
 
 export type VoiceExtractRequest = {
   language?: string;

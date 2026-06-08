@@ -2,6 +2,7 @@
   "name": "frida-carclaims-frontend",
   "version": "0.1.0",
   "private": false,
+  "proxy": "http://localhost:8080",
   "homepage": "https://frida-api.github.io/frida-carclaims-frontend",
   "dependencies": {
     "@emotion/react": "^11.10.5",
