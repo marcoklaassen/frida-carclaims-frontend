@@ -1,10 +1,12 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+set -euo pipefail
 
 : "${VOICE_API_BACKEND:=http://host.docker.internal:8080}"
 
-envsubst '${VOICE_API_BACKEND}' \
-  < /etc/nginx/templates/default.conf.template \
-  > /etc/nginx/conf.d/default.conf
+mkdir -p /var/lib/nginx/conf /var/lib/nginx/logs /var/lib/nginx/run
 
-exec nginx -g 'daemon off;'
+sed "s|\${VOICE_API_BACKEND}|${VOICE_API_BACKEND}|g" \
+  /opt/app-root/etc/nginx.default.conf.template \
+  > /var/lib/nginx/conf/default.conf
+
+exec nginx -g 'daemon off;' -c /etc/nginx/nginx.conf

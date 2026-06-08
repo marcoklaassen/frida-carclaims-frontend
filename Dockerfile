@@ -1,6 +1,7 @@
-FROM node:22-alpine AS build
+FROM registry.redhat.io/ubi9/nodejs-22:latest AS build
 
-WORKDIR /app
+USER root
+WORKDIR /opt/app-root/src
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -16,18 +17,25 @@ ENV CI=false
 
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM registry.redhat.io/ubi9/nginx-124:latest
 
-RUN apk add --no-cache gettext
+USER root
 
-COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY nginx/nginx-openshift.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf.template /opt/app-root/etc/nginx.default.conf.template
 COPY docker/entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
 
-COPY --from=build /app/build /usr/share/nginx/html
+RUN mkdir -p /var/lib/nginx/conf /var/lib/nginx/logs /var/lib/nginx/run && \
+    chgrp -R 0 /var/lib/nginx /etc/nginx /opt/app-root /tmp && \
+    chmod -R g+uwX /var/lib/nginx /etc/nginx /opt/app-root /tmp && \
+    chmod +x /docker-entrypoint.sh
+
+COPY --from=build /opt/app-root/src/build /opt/app-root/src
 
 ENV VOICE_API_BACKEND=http://host.docker.internal:8080
 
-EXPOSE 80
+EXPOSE 8080
+
+USER 1001
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
