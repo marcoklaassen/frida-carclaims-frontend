@@ -78,6 +78,7 @@ export function VoiceInputButton({
       try {
         const response = await submitVoiceAudio(blob, {
           language: language ?? getLanguageFromSession(),
+          stepKey,
           currentState: buildVoiceCurrentState(
             stepKey,
             currentState as Record<string, unknown>

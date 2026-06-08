@@ -9,6 +9,7 @@ const VOICE_API_URL =
 export type VoiceExtractRequest = {
   language?: string;
   currentState?: Record<string, unknown>;
+  stepKey?: string;
 };
 
 type VoiceExtractResponse = {
@@ -41,6 +42,10 @@ export async function submitVoiceAudio(
 
   if (options.language) {
     formData.append('language', options.language.toLowerCase());
+  }
+
+  if (options.stepKey) {
+    formData.append('stepKey', options.stepKey);
   }
 
   const response = await fetch(VOICE_API_URL, {
